@@ -182,7 +182,11 @@ def oauth2_authorize(request):
     scopes = request.GET.getlist('scopes', django_util.oauth2_settings.scopes)
     # Model storage (but not session storage) requires a logged in user
     if django_util.oauth2_settings.storage_model:
-        if not request.user.is_authenticated():
+        try:
+            request_user_is_authenticated = request.user.is_authenticated()
+        except TypeError:
+            request_user_is_authenticated = request.user.is_authenticated
+        if not request_user_is_authenticated:
             return redirect('{0}?next={1}'.format(
                 settings.LOGIN_URL, parse.quote(request.get_full_path())))
         # This checks for the case where we ended up here because of a logged
