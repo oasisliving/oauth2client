@@ -26,7 +26,6 @@ import os
 from django import http
 from django import shortcuts
 from django.conf import settings
-from django.core import urlresolvers
 from django.shortcuts import redirect
 from django.utils import html
 import jsonpickle
@@ -36,6 +35,11 @@ from oauth2client import client
 from oauth2client.contrib import django_util
 from oauth2client.contrib.django_util import get_storage
 from oauth2client.contrib.django_util import signals
+
+try:
+    from django import urls as urlresolvers
+except ImportError:
+    from django.core import urlresolvers
 
 _CSRF_KEY = 'google_oauth2_csrf_token'
 _FLOW_KEY = 'google_oauth2_flow_{0}'
