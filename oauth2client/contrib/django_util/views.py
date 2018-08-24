@@ -26,7 +26,6 @@ import os
 from django import http
 from django import shortcuts
 from django.conf import settings
-from django.core import urlresolvers
 from django.shortcuts import redirect
 from django.utils import html
 import jsonpickle
@@ -36,6 +35,11 @@ from oauth2client import client
 from oauth2client.contrib import django_util
 from oauth2client.contrib.django_util import get_storage
 from oauth2client.contrib.django_util import signals
+
+try:
+    from django import urls as urlresolvers
+except ImportError:
+    from django.core import urlresolvers
 
 _CSRF_KEY = 'google_oauth2_csrf_token'
 _FLOW_KEY = 'google_oauth2_flow_{0}'
@@ -178,7 +182,11 @@ def oauth2_authorize(request):
     scopes = request.GET.getlist('scopes', django_util.oauth2_settings.scopes)
     # Model storage (but not session storage) requires a logged in user
     if django_util.oauth2_settings.storage_model:
-        if not request.user.is_authenticated():
+        try:
+            request_user_is_authenticated = request.user.is_authenticated()
+        except TypeError:
+            request_user_is_authenticated = request.user.is_authenticated
+        if not request_user_is_authenticated:
             return redirect('{0}?next={1}'.format(
                 settings.LOGIN_URL, parse.quote(request.get_full_path())))
         # This checks for the case where we ended up here because of a logged

@@ -70,8 +70,12 @@ def oauth_required(decorated_function=None, scopes=None, **decorator_kwargs):
     def curry_wrapper(wrapped_function):
         @wraps(wrapped_function)
         def required_wrapper(request, *args, **kwargs):
+            try:
+                request_user_is_authenticated = request.user.is_authenticated()
+            except TypeError:
+                request_user_is_authenticated = request.user.is_authenticated
             if not (django_util.oauth2_settings.storage_model is None or
-                    request.user.is_authenticated()):
+                    request_user_is_authenticated):
                 redirect_str = '{0}?next={1}'.format(
                     django.conf.settings.LOGIN_URL,
                     parse.quote(request.path))

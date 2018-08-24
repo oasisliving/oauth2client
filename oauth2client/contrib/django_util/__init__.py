@@ -230,13 +230,17 @@ import importlib
 
 import django.conf
 from django.core import exceptions
-from django.core import urlresolvers
 from six.moves.urllib import parse
 
 from oauth2client import clientsecrets
 from oauth2client import transport
 from oauth2client.contrib import dictionary_storage
 from oauth2client.contrib.django_util import storage
+
+try:
+    from django import urls as urlresolvers
+except ImportError:
+    from django.core import urlresolvers
 
 GOOGLE_OAUTH2_DEFAULT_SCOPES = ('email',)
 GOOGLE_OAUTH2_REQUEST_ATTRIBUTE = 'oauth'
@@ -416,8 +420,12 @@ def _redirect_with_params(url_name, *args, **kwargs):
 def _credentials_from_request(request):
     """Gets the authorized credentials for this flow, if they exist."""
     # ORM storage requires a logged in user
+    try:
+        request_user_is_authenticated = request.user.is_authenticated()
+    except TypeError:
+        request_user_is_authenticated = request.user.is_authenticated
     if (oauth2_settings.storage_model is None or
-            request.user.is_authenticated()):
+            request_user_is_authenticated):
         return get_storage(request).get()
     else:
         return None
