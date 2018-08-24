@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v4.1.3
+
+Bug fixes:
+* Support for Django 2.0
+
 ## v4.1.2
 
 **Note**: oauth2client is deprecated. No more features will be added to the
